@@ -1,12 +1,12 @@
 #include <iostream>
 #include <stdlib.h>
-#include <smmintrin.h>
+#include <arm_neon.h>
 #include <time.h>
 #define MEM_BUFFER_SIZE 128*1024*1024
 #define TIME_MASK 0x00003FFFFFFFF
 using namespace std;
 
-int period, sender, receiver, sender_loop, ignore_bits, numbits;
+long long int period, sender, receiver, sender_loop, ignore_bits, numbits;
 int * fillerData;
 static inline long long int getTSCold2() {
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
  //       string ready;
 //        cin >> ready;
 
-	long long int * probes = (long long int*) malloc(sizeof(long long int) * MEM_BUFFER_SIZE);
+	long long int * probes = (long long int*) malloc(sizeof(long long int) * 2500);
         while((getTSC() & TIME_MASK) > 20000) {  }
 
         long long int startTime = getTSC();
@@ -65,26 +65,31 @@ int main(int argc, char* argv[])
                         ind = (ind*ind);
                         ind = ind % MEM_BUFFER_SIZE;
                         ind &= 0xFFFFFFFB;
-                        _mm_stream_si32(&fillerData[ind], ind);
+			int32x4_t i = {ind, ind, ind, ind};
+                        vst1q_s32(&fillerData[ind], i);
                 }
 		
-                long long probeStop = getTSC();
+                long long int probeStop = getTSC();
 		if ( i >= ignore_bits) {
-                        long index = i - ignore_bits;
-                        probes[index*2+1] = probeStop - probeStart;
+                        int index = i - ignore_bits;
+//                        printf("%lld\n", (index*2+1));
+//			if(probes==NULL) printf("Null\n");
+			probes[index*2+1] = probeStop - probeStart;
                         probes[index*2] = getTSC();
                 }
         }
 
-	long avg = 0;
+	long long int avg = 0;
         for (int i = 0; i < numbits; ++i) {
                 avg += probes[i*2+1];
         }
         avg = avg/numbits;
 
         for (int i = 0; i < numbits; ++i) {
-                int res = ((probes[i*2+1] < avg)) ? 0 : 1;
-		cout << res << endl;
+                int res = ((probes[i*2+1] > avg)) ? 0 : 1;
+		if (i) 
+		//	int diff = p
+		cout << res << "\t" << probes[2*i+1] << "\t" << probes[2*i]-probes[2*i-2] << endl;
         }
 
 }
