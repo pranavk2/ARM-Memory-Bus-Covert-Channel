@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <smmintrin.h>
 #include <time.h>
-#include "../../papi-5.3.0/src/papi.h"
-#define PERF_CTRS
 
 #define TIME_MASK 0x000003FFFFFFFF
 #define MEM_BUFFER_SIZE 128*1024*1024
@@ -26,9 +24,6 @@ static inline long long int getTSCold2() {
         return tsc;
 }
 
-long long int getTSCold() {
-	return PAPI_get_real_nsec();
-}
 
 long long int getTSC() {
 	struct timespec time;
