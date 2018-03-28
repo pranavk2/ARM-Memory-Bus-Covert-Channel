@@ -1,0 +1,1 @@
+Run make to build the binaries and run.sh to run the memory bus. The output should be stored in a newly created file called temp.txt and the output should contain a bit sequence of two 1's and one 0's being repeated for a total of 1000 times. This bit pattern is hard coded in sender.cpp and can be changed.
